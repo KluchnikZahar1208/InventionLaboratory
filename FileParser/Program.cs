@@ -99,8 +99,6 @@ namespace FileParser
             foreach (XmlNode row in xml.SelectNodes("//RapidControlStatus"))
             {
                 string randomStatus = GetRandomStatus(statuses, random);
-                Console.WriteLine("Randomly generated status: " + randomStatus);
-
                 string pattern = @"<ModuleState>(.+)</ModuleState>";
                 string replacement = $"<ModuleState>{randomStatus}</ModuleState>";
                 string modifiedXmlString = Regex.Replace(row.InnerText, pattern, replacement);

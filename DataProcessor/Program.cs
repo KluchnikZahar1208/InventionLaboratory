@@ -90,8 +90,7 @@ namespace DataProcessor
                     {
                         string moduleStateValue = matchRapidControlStatus.Groups[1].Value;
 
-                        Log.Information($"{moduleCategoryID}: {moduleStateValue}");
-                        ProcessAndSaveToSQLite(moduleCategoryID, moduleStateValue);
+                        Task.Run(() => ProcessAndSaveToSQLite(moduleCategoryID, moduleStateValue));
 
                     }
                     else
