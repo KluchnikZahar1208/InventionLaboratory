@@ -10,12 +10,11 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
-namespace FileParserService
+namespace FileParser
 {
-    public class FileParserService
+    public class FileParser
     {
-        private const string QueueName = "DataProcessorQueue";
-        private static readonly string XmlFolderPath = @"E:\TestTasks\Лаборатория изобретений\FileProcessor\Data\";
+        private static RabbitMQSettings? _rabbitmqSettings;
 
         public static void Main()
         {
@@ -27,13 +26,13 @@ namespace FileParserService
             IConfigurationRoot root = configuration.Build();
 
 
-            var rabbitMQSettings = new RabbitMQSettings();
-            root.GetSection("RabbitMQSettings").Bind(rabbitMQSettings);
+            _rabbitmqSettings = new RabbitMQSettings();
+            root.GetSection("RabbitMQSettings").Bind(_rabbitmqSettings);
 
-            var factory = new ConnectionFactory() { HostName = rabbitMQSettings.HostName };
+            var factory = new ConnectionFactory() { HostName = _rabbitmqSettings.HostName };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare(queue: rabbitMQSettings.QueueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueDeclare(queue: _rabbitmqSettings.QueueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
             var timer = new Timer(ProcessFile,
                                   channel,
@@ -47,8 +46,9 @@ namespace FileParserService
 
         private static void ProcessFile(object state)
         {
+            string parentDirectory = GetParentDirectory(Directory.GetCurrentDirectory(), 3) + "\\Data";
             var channel = (IModel)state;
-            var xmlFiles = Directory.GetFiles(XmlFolderPath, "*.xml");
+            var xmlFiles = Directory.GetFiles(parentDirectory, "*.xml");
 
             foreach (var xmlFilePath in xmlFiles)
             {
@@ -67,7 +67,22 @@ namespace FileParserService
                 }
             }
         }
+        static string GetParentDirectory(string path, int levels)
+        {
+            for (int i = 0; i < levels; i++)
+            {
+                DirectoryInfo parent = Directory.GetParent(path);
 
+                if (parent == null)
+                {
+                    return null;
+                }
+
+                path = parent.FullName;
+            }
+
+            return path;
+        }
         private static XmlDocument ReadXml(string xmlFilePath)
         {
             XmlDocument xmlDoc = new();
@@ -101,7 +116,7 @@ namespace FileParserService
 
         private static void SendJsonToRabbitMQ(IModel channel, string json)
         {
-            channel.BasicPublish(exchange: "", routingKey: QueueName, basicProperties: null, body: Encoding.UTF8.GetBytes(json));
+            channel.BasicPublish(exchange: "", routingKey: _rabbitmqSettings.QueueName, basicProperties: null, body: Encoding.UTF8.GetBytes(json));
         }
     }
 }

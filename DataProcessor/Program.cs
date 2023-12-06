@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Serilog;
+using Microsoft.Extensions.Configuration;
 
 
 namespace DataProcessor
@@ -18,6 +19,8 @@ namespace DataProcessor
     {
         private static IConnection? connection;
         private static IModel? channel;
+        private static RabbitMQSettings? _rabbitmqSettings;
+
         static void Main()
         {
             // Configure Serilog for logging to the console
@@ -26,11 +29,18 @@ namespace DataProcessor
                 .CreateLogger();
             try
             {
-                var factory = new ConnectionFactory() { HostName = "localhost" };
+                IConfigurationBuilder configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true);
+                IConfigurationRoot root = configuration.Build();
+
+
+                _rabbitmqSettings = new RabbitMQSettings();
+                root.GetSection("RabbitMQSettings").Bind(_rabbitmqSettings);
+
+                var factory = new ConnectionFactory() { HostName = _rabbitmqSettings.HostName };
                 connection = factory.CreateConnection();
                 channel = connection.CreateModel();
 
-                channel.QueueDeclare(queue: "DataProcessorQueue", durable: true, exclusive: false, autoDelete: false, arguments: null);
+                channel.QueueDeclare(queue: _rabbitmqSettings.QueueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
@@ -43,7 +53,7 @@ namespace DataProcessor
                     AddToDataBase(xmlDoc);
                 };
 
-                channel.BasicConsume(queue: "DataProcessorQueue", autoAck: true, consumer: consumer);
+                channel.BasicConsume(queue: _rabbitmqSettings.QueueName, autoAck: true, consumer: consumer);
 
                 Console.WriteLine("Data Processor Service is running. Press [Enter] to exit.");
                 Console.ReadLine();
@@ -101,7 +111,7 @@ namespace DataProcessor
         {
             try
             {
-                using var dbContext = new Data.AppContext();
+                using var dbContext = new Data.AppContext(GetParentDirectory(Directory.GetCurrentDirectory(), 3) + "\\DataBase");
                 dbContext.Database.EnsureCreated();
 
                 var existingModule = dbContext.Modules.SingleOrDefault(md => md.ModuleCategoryID == moduleCategoryId);
@@ -129,6 +139,22 @@ namespace DataProcessor
             {
                 Log.Error(ex, "Error processing and saving to SQLite database.");
             }
+        }
+        static string GetParentDirectory(string path, int levels)
+        {
+            for (int i = 0; i < levels; i++)
+            {
+                DirectoryInfo parent = Directory.GetParent(path);
+
+                if (parent == null)
+                {
+                    return null;
+                }
+
+                path = parent.FullName;
+            }
+
+            return path;
         }
 
     }

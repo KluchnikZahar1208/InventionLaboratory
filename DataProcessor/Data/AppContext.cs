@@ -10,11 +10,16 @@ namespace DataProcessor.Data
 {
     public class AppContext : DbContext
     {
+        public AppContext(string path)
+        {
+            Path = path;
+        }
         public DbSet<Module>? Modules { get; set; }
+        private string Path;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=DataProcessorDatabase.db");
+            optionsBuilder.UseSqlite($"Data Source={Path}\\DataProcessorDatabase.db");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

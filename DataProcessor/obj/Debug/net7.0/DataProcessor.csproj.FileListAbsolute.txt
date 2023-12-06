@@ -60,3 +60,11 @@ E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\runtimes\win-arm
 E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\runtimes\win-x64\native\e_sqlite3.dll
 E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\runtimes\win-x86\native\e_sqlite3.dll
 E:\TestTasks\InventionLaboratory\DataProcessor\obj\Debug\net7.0\DataProcessor.csproj.CopyComplete
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\appsettings.json
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.Configuration.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.Configuration.Binder.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.Configuration.FileExtensions.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.Configuration.Json.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.FileProviders.Physical.dll
+E:\TestTasks\InventionLaboratory\DataProcessor\bin\Debug\net7.0\Microsoft.Extensions.FileSystemGlobbing.dll
